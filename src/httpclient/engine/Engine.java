@@ -1,5 +1,6 @@
 package httpclient.engine;
 
+import httpclient.engine.request.Request;
 import httpclient.engine.response.BrowserWindow;
 import httpclient.engine.response.InfoWindow;
 import httpclient.engine.response.Response;
@@ -28,10 +29,8 @@ public class Engine implements Runnable
         
         String host;
         int port;
-        String path;
-        String query;
         
-        browserWindow.setProgressValue(0);
+        browserWindow.setProgress(0);
         
         try {
             uri = new URI(address);
@@ -42,55 +41,40 @@ public class Engine implements Runnable
         if(host.isEmpty()){
            // throw new IOException("no host specified");
         }
-
         port = uri.getPort();
         if(port < 1){
             port = 80;
         }
         
-        path = uri.getPath();
-        if(path.isEmpty()){
-            path = "/";
-        }
-        
-        query = uri.getQuery();
-        if(query!=null){
-            query = "?" + query;
-        } else {
-            query = "";
-        }
         try {
             
             Socket socket = new Socket(host, port);
-            // функция по формированию запроса
-            // URLEncoder.encode
-            String header = preferences.getRequestType() + " "
-                   + path + query + " HTTP/1.1\r\n"
-                   + "Host: " + host + "\r\n"
-                   + "User-Agent: httpclient0.2\r\n\r\n";
-                   //+ "Accept: text/html\r\n"
-                   //+ "Connection: close\r\n\r\n";
-                   
-            // пишем в сокет HTTP request
-            socket.getOutputStream().write(header.getBytes());
-            socket.getOutputStream().flush();
-            
+
+            // while(!<Headers.Connection>="closed"){...}
+
+            // send request
+            OutputStream out = socket.getOutputStream();
+            Request request = new Request(out, uri, preferences);
+            request.write();
+
             // сколько ждем ответ сервера
             // socket.setSoTimeout(5000);
            
-            // принимаем ответ сервера
+            // receive response
             InputStream is = socket.getInputStream();
 
-            Response response = new Response(is, browserWindow, infoWindow);
+            Response response = new Response(is, preferences, browserWindow, infoWindow);
             response.read();
 
             socket.close();
             
         }
+        catch(UnknownHostException e){
+            browserWindow.showError("Unknown Host: " + e.getMessage());
+        }
         catch(Exception e) {
             e.printStackTrace();
-            browserWindow.setTextPaneValue(e.getMessage());
+            browserWindow.showError(e.getMessage());
         }
-        //return null;
     }
 }
