@@ -42,7 +42,7 @@ public class OptionsDialog extends javax.swing.JDialog {
 
         jLabel2.setText("Path to file with form:");
 
-        jTextField1.setText("form_file.html");
+        jTextField1.setText("index.html");
 
         jButton1.setText("OK");
         jButton1.addMouseListener(new java.awt.event.MouseAdapter() {

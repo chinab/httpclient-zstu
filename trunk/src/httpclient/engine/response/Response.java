@@ -1,7 +1,7 @@
 package httpclient.engine.response;
 
+import httpclient.engine.PreferenceList;
 import httpclient.engine.general.*;
-import httpclient.gui.*;
 import java.io.*;
 
 public class Response implements HTTPHeaders{
@@ -12,12 +12,14 @@ public class Response implements HTTPHeaders{
     private String message;
     private BrowserWindow browserWindow;
     private InfoWindow infoWindow;
+    private PreferenceList preferences;
 
-    public Response(InputStream is, BrowserWindow browserWindow,
-            InfoWindow infoWindow){
+    public Response(InputStream is, PreferenceList preferences, 
+            BrowserWindow browserWindow, InfoWindow infoWindow){
         this.browserWindow = browserWindow;
         this.infoWindow = infoWindow;
         this.in = is;
+        this.preferences = preferences;
     }
 
     private String readLine() throws IOException{
@@ -56,7 +58,7 @@ public class Response implements HTTPHeaders{
             downloaded++;
             if(!progressDisabled){
                 float p = (float)downloaded/(float)contentLength*100;
-                browserWindow.setProgressValue(Math.round(p));
+                browserWindow.setProgress(Math.round(p));
             }
         }
         messageBody = baos.toString();
@@ -126,7 +128,7 @@ public class Response implements HTTPHeaders{
         return new Header(name, value);
     }
 
-   public void read() throws IOException {
+    public void read() throws IOException {
         // get starting line
         String newLine = readLine();
         startingLine = parseStartingLine(newLine);
@@ -142,34 +144,36 @@ public class Response implements HTTPHeaders{
                 // парсим прошлую строку
                 headerList.addHeader(parseHeader(completeHeader));
                 completeHeader = "";
-            } 
+            }
         }
         // update header table
         infoWindow.updateHeaders(headerList);
-        // progressbar routine
-        boolean progressDisabled = false;
-        boolean chunked = false;
-        int contentLength = -1;
-        if(!headerList.hasHeader(HEADER_CONTENT_LENGTH)){
-            progressDisabled = true;
-        } else {
-            contentLength = Integer.parseInt(
-                    headerList.getHeader(HEADER_CONTENT_LENGTH).getValue());
-        }
-        if(headerList.hasHeader(TRANSFER_ENCODING)){
-            if(headerList.getHeader(
-                    TRANSFER_ENCODING).getValue().equals("chunked")){
-                progressDisabled = false;
-                chunked = true;
+        if(!preferences.getRequestType().equals(
+                PreferenceList.HTTP_REQUEST_HEAD)){
+            // progressbar routine
+            boolean progressDisabled = false;
+            boolean chunked = false;
+            int contentLength = -1;
+            if(!headerList.hasHeader(HEADER_CONTENT_LENGTH)){
+                progressDisabled = true;
+            } else {
+                contentLength = Integer.parseInt(
+                        headerList.getHeader(HEADER_CONTENT_LENGTH).getValue());
             }
+            if(headerList.hasHeader(TRANSFER_ENCODING)){
+                if(headerList.getHeader(
+                        TRANSFER_ENCODING).getValue().equals("chunked")){
+                    progressDisabled = false;
+                    chunked = true;
+                }
+            }
+            if(chunked){
+                message = readChunkedMessage(progressDisabled);
+            } else {
+                message = readMessage(contentLength, progressDisabled);
+            }
+            browserWindow.showMessage(message);
         }
-        if(chunked){
-            message = readChunkedMessage(progressDisabled);
-        } else {
-            message = readMessage(contentLength, progressDisabled);
-        }
-
-        browserWindow.setTextPaneValue(message);
-        browserWindow.setProgressValue(100);
+        browserWindow.setProgress(100);
     } 
 }

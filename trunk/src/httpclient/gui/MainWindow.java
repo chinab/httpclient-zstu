@@ -2,6 +2,7 @@ package httpclient.gui;
 
 import httpclient.engine.*;
 import httpclient.engine.response.BrowserWindow;
+import java.awt.Color;
 import java.awt.Image;
 import java.awt.Toolkit;
 
@@ -156,12 +157,18 @@ public class MainWindow extends javax.swing.JFrame
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-public void setProgressValue(int value){
+public void setProgress(int value){
     jProgress.setValue(value);
 }
 
-public void setTextPaneValue(String value){
-    jBrowserTextPane.setText(value);
+public void showMessage(String message){
+    jBrowserTextPane.setForeground(Color.BLACK);
+    jBrowserTextPane.setText(message);
+}
+
+public void showError(String message){
+    jBrowserTextPane.setText(message);
+    jBrowserTextPane.setForeground(Color.RED);
 }
 
 private void startEngine(){
