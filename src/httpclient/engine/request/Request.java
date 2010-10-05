@@ -1,16 +1,9 @@
 package httpclient.engine.request;
 
 import httpclient.engine.PreferenceList;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.Reader;
 import java.net.URI;
-import javax.swing.text.html.HTMLEditorKit;
-import javax.swing.text.html.parser.ParserDelegator;
-
 
 public class Request {
 
@@ -38,7 +31,7 @@ public class Request {
         String header = preferences.getRequestType() + " "
                + path + query + " HTTP/1.1\r\n"
                + "Host: " + uri.getHost() + "\r\n"
-               + "User-Agent: httpclient0.2\r\n\r\n";
+               + "User-Agent: httpclient 0.1\r\n\r\n";
                //+ "Accept: text/html\r\n"
                //+ "Connection: close\r\n\r\n";
         return header;
@@ -47,6 +40,8 @@ public class Request {
     private void getFormFields() throws IOException {
         HTMLFile file = new HTMLFile(preferences.getPathToPOSTFile());
         file.parse();
+        System.out.println(file.getAction());
+        System.out.println(file.getArguments());
     }
 
 
