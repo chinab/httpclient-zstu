@@ -4,18 +4,23 @@ import httpclient.engine.PreferenceList;
 import httpclient.engine.general.*;
 import httpclient.engine.general.MIMETypes;
 import java.io.*;
+import java.net.URI;
+import javax.swing.JFileChooser;
 
 public class Response implements HTTPHeaders{
 
     private InputStream in;
+    private String resourceName;
     private StartingLine startingLine;
     private HeaderList headerList;
     private BrowserWindow browserWindow;
     private InfoWindow infoWindow;
     private PreferenceList preferences;
 
-    public Response(InputStream is, PreferenceList preferences, 
-            BrowserWindow browserWindow, InfoWindow infoWindow){
+    public Response(InputStream is, String resourceName,
+            PreferenceList preferences, BrowserWindow browserWindow,
+            InfoWindow infoWindow){
+        this.resourceName = resourceName;
         this.browserWindow = browserWindow;
         this.infoWindow = infoWindow;
         this.in = is;
@@ -178,13 +183,30 @@ public class Response implements HTTPHeaders{
                         HEADER_CONTENT_TYPE).getValue())){
                     browserWindow.showMessage(message.toString());
                 } else {
-                    FileOutputStream fos = new FileOutputStream("newfile");
-                    message.writeTo(fos);
-                    fos.close();
+                    
+                    File currentDir = new File(".");
+                    JFileChooser fileChooser = new JFileChooser();
+                    fileChooser.setCurrentDirectory(currentDir);
+                    fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                    fileChooser.setDialogTitle("Save " + resourceName + " to...");
+                    int returnVal = fileChooser.showDialog(browserWindow.getComponent(), "Save");
+                    if (returnVal == JFileChooser.APPROVE_OPTION) {
+                        System.out.println("<<>>>>");
+                        File outDir = fileChooser.getSelectedFile();
+                        FileOutputStream fos = new FileOutputStream(
+                                outDir.getAbsolutePath()
+                                + File.separatorChar + resourceName);
+                        message.writeTo(fos);
+                        fos.close();
+                    } 
                 }
             }
-
+            message.reset();
+            message = null;
+            System.gc();
+        } else {
+            browserWindow.showMessage("");
         }
         browserWindow.setProgress(100);
-    } 
+    }
 }

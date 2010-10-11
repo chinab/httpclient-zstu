@@ -29,7 +29,7 @@ public class Engine implements Runnable
         
         String host;
         int port;
-        
+        browserWindow.enableGoButton(false);
         browserWindow.setProgress(0);
         
         try {
@@ -38,43 +38,40 @@ public class Engine implements Runnable
             System.out.println(exc.getMessage());
         }
         host = uri.getHost();
-        if(host.isEmpty()){
-           // throw new IOException("no host specified");
-        }
         port = uri.getPort();
         if(port < 1){
             port = 80;
         }
-        
         try {
             
             Socket socket = new Socket(host, port);
-
+            String resourceName;
             // while(!<Headers.Connection>="closed"){...}
 
             // send request
             OutputStream out = socket.getOutputStream();
             Request request = new Request(out, uri, preferences);
             request.write();
-
+            resourceName = request.getResourceName();
             // сколько ждем ответ сервера
             // socket.setSoTimeout(5000);
            
             // receive response
             InputStream is = socket.getInputStream();
 
-            Response response = new Response(is, preferences, browserWindow, infoWindow);
+            Response response = new Response(is, resourceName, preferences,
+                    browserWindow, infoWindow);
             response.read();
 
             socket.close();
             
-        }
-        catch(UnknownHostException e){
+        } catch(UnknownHostException e){
             browserWindow.showError("Unknown Host: " + e.getMessage());
-        }
-        catch(Exception e) {
+        } catch(Exception e) {
             e.printStackTrace();
             browserWindow.showError(e.getMessage());
+        } finally {
+            browserWindow.enableGoButton(true);
         }
     }
 }
