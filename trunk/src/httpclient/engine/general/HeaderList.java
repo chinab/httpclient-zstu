@@ -53,7 +53,7 @@ public class HeaderList {
     public ArrayList<String> getCookies(){
         ArrayList<String> cookies = new ArrayList<String>();
         for(Header header: headers){
-            if(header.getName().equals(HTTPHeaders.SET_COOKIE)){
+            if(header.getName().equals(HTTPHeaders.HEADER_SET_COOKIE)){
                 cookies.add(header.getValue());
             }
         }

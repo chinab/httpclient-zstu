@@ -2,6 +2,7 @@ package httpclient.engine.response;
 
 import httpclient.engine.PreferenceList;
 import httpclient.engine.general.*;
+import httpclient.engine.general.MIMETypes;
 import java.io.*;
 
 public class Response implements HTTPHeaders{
@@ -9,7 +10,6 @@ public class Response implements HTTPHeaders{
     private InputStream in;
     private StartingLine startingLine;
     private HeaderList headerList;
-    private String message;
     private BrowserWindow browserWindow;
     private InfoWindow infoWindow;
     private PreferenceList preferences;
@@ -42,7 +42,7 @@ public class Response implements HTTPHeaders{
         return baos.toString();
     }
 
-    private String readMessage(int contentLength, boolean progressDisabled)
+    private ByteArrayOutputStream readMessage(int contentLength, boolean progressDisabled)
             throws IOException {
         int b;
         int downloaded = 0;
@@ -61,12 +61,12 @@ public class Response implements HTTPHeaders{
                 browserWindow.setProgress(Math.round(p));
             }
         }
-        messageBody = baos.toString();
-        return messageBody;
+        return baos;
     }
 
-    private String readChunkedMessage(boolean progressDisabled) throws IOException {
-        StringBuilder sb = new StringBuilder();
+    private ByteArrayOutputStream readChunkedMessage(boolean progressDisabled)
+            throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
         // read first chunk size and CRLF
         int chunkSize;
         try{
@@ -76,8 +76,7 @@ public class Response implements HTTPHeaders{
         }
         while(chunkSize>0){
             // read chunk data
-            String chunkData = readMessage(chunkSize, progressDisabled);
-            sb.append(chunkData);
+            readMessage(chunkSize, progressDisabled).writeTo(baos);
             // read CRLF
             readLine();
             // read chunk size and CRLF
@@ -87,7 +86,7 @@ public class Response implements HTTPHeaders{
                 throw new IOException("can't read chunk size");
             }
         }
-        return sb.toString();
+        return baos;
     }
 
     private StartingLine parseStartingLine(final String line)
@@ -160,19 +159,31 @@ public class Response implements HTTPHeaders{
                 contentLength = Integer.parseInt(
                         headerList.getHeader(HEADER_CONTENT_LENGTH).getValue());
             }
-            if(headerList.hasHeader(TRANSFER_ENCODING)){
+            if(headerList.hasHeader(HEADER_TRANSFER_ENCODING)){
                 if(headerList.getHeader(
-                        TRANSFER_ENCODING).getValue().equals("chunked")){
+                        HEADER_TRANSFER_ENCODING).getValue().equals("chunked")){
                     progressDisabled = false;
                     chunked = true;
                 }
             }
+            ByteArrayOutputStream message;
+
             if(chunked){
                 message = readChunkedMessage(progressDisabled);
             } else {
                 message = readMessage(contentLength, progressDisabled);
             }
-            browserWindow.showMessage(message);
+            if(headerList.hasHeader(HEADER_CONTENT_TYPE)){
+                if(MIMETypes.isTextType(headerList.getHeader(
+                        HEADER_CONTENT_TYPE).getValue())){
+                    browserWindow.showMessage(message.toString());
+                } else {
+                    FileOutputStream fos = new FileOutputStream("newfile");
+                    message.writeTo(fos);
+                    fos.close();
+                }
+            }
+
         }
         browserWindow.setProgress(100);
     } 
