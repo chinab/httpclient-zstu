@@ -44,7 +44,19 @@ public class Request {
         System.out.println(file.getArguments());
     }
 
-
+    public String getResourceName(){
+        String path = uri.toString();
+        path.replace("\\", "/");
+        int index = path.lastIndexOf("/");
+        if(index>0){
+            if(uri.getHost().endsWith(path.substring(index+1))){
+                return "";
+            } else {
+                return path.substring(index+1);
+            }
+        }
+        return "";
+    }
 
     public void write() throws IOException {
         if(this.preferences.getRequestType().equals("POST")){

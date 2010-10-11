@@ -3,8 +3,10 @@ package httpclient.gui;
 import httpclient.engine.*;
 import httpclient.engine.response.BrowserWindow;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.awt.event.KeyEvent;
 
 
 
@@ -171,6 +173,16 @@ public void showError(String message){
     jBrowserTextPane.setForeground(Color.RED);
 }
 
+public Component getComponent(){
+    return this;
+}
+
+public void enableGoButton(boolean setEnabled){
+    jGoButton.setEnabled(setEnabled);
+    jURI.setEnabled(setEnabled);
+}
+
+
 private void startEngine(){
     MainWindow mainWindow = this;
     String URI = jURI.getText();
@@ -203,7 +215,7 @@ private void jMenuItemOptionsMouseReleased(java.awt.event.MouseEvent evt) {//GEN
 }//GEN-LAST:event_jMenuItemOptionsMouseReleased
 
 private void jURIKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jURIKeyPressed
-    if(evt.getKeyCode()==evt.VK_ENTER){
+    if(evt.getKeyCode()==KeyEvent.VK_ENTER){
         startEngine();
     }
 }//GEN-LAST:event_jURIKeyPressed
