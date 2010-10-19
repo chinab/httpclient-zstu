@@ -22,7 +22,7 @@ public class HeaderList {
 
     public boolean hasHeader(String name){
         for(Header header: headers){
-            if(header.getName().equals(name)){
+            if(header.getName().equalsIgnoreCase(name)){
                 return true;
             }
         }
@@ -31,7 +31,7 @@ public class HeaderList {
 
     public Header getHeader(String name){
         for(Header header: headers){
-            if(header.getName().equals(name)){
+            if(header.getName().equalsIgnoreCase(name)){
                 return header;
             }
         }
@@ -53,7 +53,7 @@ public class HeaderList {
     public ArrayList<String> getCookies(){
         ArrayList<String> cookies = new ArrayList<String>();
         for(Header header: headers){
-            if(header.getName().equals(HTTPHeaders.HEADER_SET_COOKIE)){
+            if(header.getName().equalsIgnoreCase(HTTPHeaders.HEADER_SET_COOKIE)){
                 cookies.add(header.getValue());
             }
         }
