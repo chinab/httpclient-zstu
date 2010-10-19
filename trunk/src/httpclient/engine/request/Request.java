@@ -1,15 +1,22 @@
 package httpclient.engine.request;
 
 import httpclient.engine.PreferenceList;
+import httpclient.engine.general.HTTPHeaders;
+import httpclient.engine.general.Header;
+import httpclient.engine.general.HeaderList;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
+import sun.misc.BASE64Encoder;
 
-public class Request {
+public class Request implements HTTPHeaders {
 
     private PreferenceList preferences;
     private URI uri;
     private OutputStream out;
+    private boolean useAuthentication = false;
+    private String password;
+    private String login;
 
     public Request(OutputStream out, URI uri, PreferenceList preferences){
         this.preferences = preferences;
@@ -17,7 +24,7 @@ public class Request {
         this.out = out;
     }
 
-    private String getHeaderString(){
+    private String getRequestLine(){
         String path = uri.getPath();
         if(path.isEmpty()){
             path = "/";
@@ -28,13 +35,28 @@ public class Request {
         } else {
             query = "";
         }
-        String header = preferences.getRequestType() + " "
-               + path + query + " HTTP/1.1\r\n"
-               + "Host: " + uri.getHost() + "\r\n"
-               + "User-Agent: httpclient 0.1\r\n\r\n";
-               //+ "Accept: text/html\r\n"
-               //+ "Connection: close\r\n\r\n";
-        return header;
+        return preferences.getRequestType() + " " + path + query + " HTTP/1.1";
+    }
+
+    private String getRequestString(){
+        // create headers
+        HeaderList headerList = new HeaderList();
+        headerList.addHeader(new Header(HEADER_HOST, uri.getHost()));
+        headerList.addHeader(new Header(HEADER_USER_AGENT, "httpclient 0.1"));
+
+        if(useAuthentication){
+            BASE64Encoder encoder = new BASE64Encoder();
+            String authParams = login + ":" + password;
+            authParams = "Basic " + encoder.encode(authParams.getBytes());
+            headerList.addHeader(new Header(HEADER_AUTHORIZATION, authParams));
+        }
+        String request = getRequestLine()
+                        + "\r\n"
+                        + headerList.toString()
+                        + "\r\n";
+                      //+ message body (if POST)
+
+        return request;
     }
 
     private void getFormFields() throws IOException {
@@ -58,12 +80,19 @@ public class Request {
         return "";
     }
 
+    public void setAuthenticationParameters(String login, String password){
+        this.login = login;
+        this.password = password;
+        useAuthentication = true;
+    }
+
     public void write() throws IOException {
         if(this.preferences.getRequestType().equals("POST")){
             getFormFields();
-            return;
+            // change!!
+            throw new IOException("post request");
         }
-            out.write(getHeaderString().getBytes());
-            out.flush();
+        out.write(getRequestString().getBytes());
+        out.flush();
     }
 }

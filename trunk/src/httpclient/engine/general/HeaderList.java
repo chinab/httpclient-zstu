@@ -59,4 +59,13 @@ public class HeaderList {
         }
         return cookies;
     }
+
+    @Override
+    public String toString(){
+        String result = "";
+        for(Header h: getAllHeaders()){
+            result += h.getName() + ": " + h.getValue() + "\r\n";
+        }
+        return result;
+    }
 }

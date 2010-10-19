@@ -1,6 +1,7 @@
-package httpclient.engine.response;
+package httpclient.engine.ui;
 
 import httpclient.engine.general.HeaderList;
+import httpclient.engine.response.StartingLine;
 
 public interface InfoWindow {
 

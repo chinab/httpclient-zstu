@@ -1,4 +1,4 @@
-package httpclient.engine.response;
+package httpclient.engine.ui;
 
 import java.awt.Component;
 

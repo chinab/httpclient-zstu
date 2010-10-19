@@ -82,6 +82,9 @@ public class HTMLFile extends HTMLEditorKit.ParserCallback{
                     String value = a.getAttribute(HTML.Attribute.VALUE).toString();
                     arguments += "&" + name + "=" + value;
                 }
+                if(a.getAttribute(HTML.Attribute.TYPE).equals("file")){
+
+                }
                 if(a.getAttribute(HTML.Attribute.TYPE).equals("submit")){
                     // finish processing
                 }

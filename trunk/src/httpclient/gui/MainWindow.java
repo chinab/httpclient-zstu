@@ -1,7 +1,7 @@
 package httpclient.gui;
 
 import httpclient.engine.*;
-import httpclient.engine.response.BrowserWindow;
+import httpclient.engine.ui.BrowserWindow;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Image;
@@ -16,6 +16,7 @@ public class MainWindow extends javax.swing.JFrame
     private final HeadersWindow headersWindow;
     private final AboutDialog aboutDialog;
     private final OptionsDialog optionsDialog;
+    private final AuthenticationDialog authDialog;
     private PreferenceList preferences;
 
     public MainWindow() {
@@ -25,8 +26,10 @@ public class MainWindow extends javax.swing.JFrame
         this.setIconImage(appIcon);
         preferences = new PreferenceList();
         headersWindow = new HeadersWindow();
-        aboutDialog = new AboutDialog(MainWindow.this, true);
-        optionsDialog = new OptionsDialog(MainWindow.this, preferences, true);
+        aboutDialog = new AboutDialog(MainWindow.this);
+        optionsDialog = new OptionsDialog(MainWindow.this, preferences);
+        authDialog = new AuthenticationDialog(MainWindow.this);
+
     }
     public static void main(String[] args) {
                 java.awt.EventQueue.invokeLater(new Runnable() {
@@ -186,7 +189,9 @@ public void enableGoButton(boolean setEnabled){
 private void startEngine(){
     MainWindow mainWindow = this;
     String URI = jURI.getText();
-    new Thread(new Engine(URI, preferences, mainWindow, headersWindow)).start();
+    
+    new Thread(new Engine(URI, preferences, mainWindow, headersWindow,
+            authDialog)).start();
 }
 
 private void jGoButtonMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jGoButtonMouseClicked

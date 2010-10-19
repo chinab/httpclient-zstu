@@ -1,10 +1,11 @@
 package httpclient.engine.response;
 
+import httpclient.engine.ui.InfoWindow;
+import httpclient.engine.ui.BrowserWindow;
 import httpclient.engine.PreferenceList;
 import httpclient.engine.general.*;
 import httpclient.engine.general.MIMETypes;
 import java.io.*;
-import java.net.URI;
 import javax.swing.JFileChooser;
 
 public class Response implements HTTPHeaders{
@@ -132,6 +133,15 @@ public class Response implements HTTPHeaders{
         return new Header(name, value);
     }
 
+    public int getStatusCode(){
+        return startingLine.getStatusCode();
+    }
+
+    public String getRealm(){
+        String www_auth = headerList.getHeader(HEADER_WWW_AUTHENTICATE).getValue();
+        return www_auth.substring(www_auth.indexOf('=')+1);
+    }
+
     public void read() throws IOException {
         // get starting line
         String newLine = readLine();
@@ -178,7 +188,9 @@ public class Response implements HTTPHeaders{
             } else {
                 message = readMessage(contentLength, progressDisabled);
             }
+
             if(headerList.hasHeader(HEADER_CONTENT_TYPE)){
+                
                 if(MIMETypes.isTextType(headerList.getHeader(
                         HEADER_CONTENT_TYPE).getValue())){
                     browserWindow.showMessage(message.toString());
@@ -191,7 +203,6 @@ public class Response implements HTTPHeaders{
                     fileChooser.setDialogTitle("Save " + resourceName + " to...");
                     int returnVal = fileChooser.showDialog(browserWindow.getComponent(), "Save");
                     if (returnVal == JFileChooser.APPROVE_OPTION) {
-                        System.out.println("<<>>>>");
                         File outDir = fileChooser.getSelectedFile();
                         FileOutputStream fos = new FileOutputStream(
                                 outDir.getAbsolutePath()
