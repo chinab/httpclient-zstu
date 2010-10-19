@@ -2,8 +2,7 @@ package httpclient.gui;
 
 import httpclient.engine.general.HeaderList;
 import httpclient.engine.general.Header;
-import httpclient.engine.response.InfoWindow;
-import httpclient.engine.response.BrowserWindow;
+import httpclient.engine.ui.InfoWindow;
 import httpclient.engine.response.StartingLine;
 import java.awt.Image;
 import java.awt.Toolkit;

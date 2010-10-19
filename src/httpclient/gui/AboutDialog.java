@@ -3,8 +3,8 @@ package httpclient.gui;
 public class AboutDialog extends javax.swing.JDialog {
 
     /** Creates new form OptionsDialog */
-    public AboutDialog(java.awt.Frame parent, boolean modal) {
-        super(parent, modal);
+    public AboutDialog(java.awt.Frame parent) {
+        super(parent, true);
         initComponents();
     }
 

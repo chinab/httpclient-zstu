@@ -1,28 +1,44 @@
 package httpclient.engine;
 
 import httpclient.engine.request.Request;
-import httpclient.engine.response.BrowserWindow;
-import httpclient.engine.response.InfoWindow;
+import httpclient.engine.ui.BrowserWindow;
+import httpclient.engine.general.HTTPConstants;
+import httpclient.engine.ui.InfoWindow;
 import httpclient.engine.response.Response;
+import httpclient.engine.ui.AuthorisationForm;
+import httpclient.gui.handlers.AuthParametersHandler;
 
 import java.io.*;
 import java.net.*;
 
 
-public class Engine implements Runnable
+public class Engine implements Runnable, AuthParametersHandler
 {
     private URI uri;
     private BrowserWindow browserWindow;
     private InfoWindow infoWindow;
+    private AuthorisationForm authForm;
     private String address;
     private PreferenceList preferences;
+
+    private String login = "";
+    private String password = "";
+    private boolean authParamsSpecified;
     
     public Engine(String address, PreferenceList preferences,
-            BrowserWindow browserWindow, InfoWindow infoWindow){
+            BrowserWindow browserWindow, InfoWindow infoWindow,
+            AuthorisationForm authForm){
         this.address = address;
         this.browserWindow = browserWindow;
+        this.authForm = authForm;
         this.infoWindow = infoWindow;
         this.preferences = preferences;
+    }
+
+    public void setAuthParameters(String login, String password){
+         authParamsSpecified = true;
+        this.login = login;
+        this.password = password;
     }
 
     public void run() {
@@ -44,26 +60,49 @@ public class Engine implements Runnable
         }
         try {
             
-            Socket socket = new Socket(host, port);
+
             String resourceName;
-            // while(!<Headers.Connection>="closed"){...}
+            
 
-            // send request
-            OutputStream out = socket.getOutputStream();
-            Request request = new Request(out, uri, preferences);
-            request.write();
-            resourceName = request.getResourceName();
-            // сколько ждем ответ сервера
-            // socket.setSoTimeout(5000);
-           
-            // receive response
-            InputStream is = socket.getInputStream();
+            while(true){
 
-            Response response = new Response(is, resourceName, preferences,
-                    browserWindow, infoWindow);
-            response.read();
+                // create socket
+                Socket socket = new Socket(host, port);
+                OutputStream out = socket.getOutputStream();
+                InputStream is = socket.getInputStream();
 
-            socket.close();
+                // send request
+                Request request = new Request(out, uri, preferences);
+                if(authParamsSpecified){
+                    request.setAuthenticationParameters(login, password);
+                    authParamsSpecified = false;
+                }
+                request.write();
+                resourceName = request.getResourceName();
+                // сколько ждем ответ сервера
+                // socket.setSoTimeout(5000);
+
+                // receive response
+                
+
+                Response response = new Response(is, resourceName, preferences,
+                        browserWindow, infoWindow);
+                response.read();
+
+                int code = response.getStatusCode();
+                if(code!=HTTPConstants.HTTP_UNAUTHORIZED){
+                    break;
+                } else {
+                    authForm.setVisible(Engine.this, response.getRealm());
+
+                    if(!authParamsSpecified){
+                        break;
+                    }
+                }
+
+                socket.close();
+            }
+
             
         } catch(UnknownHostException e){
             browserWindow.showError("Unknown Host: " + e.getMessage());

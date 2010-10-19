@@ -6,8 +6,8 @@ public class OptionsDialog extends javax.swing.JDialog {
 
     private MainWindow parent;
     private PreferenceList preferences;
-    public OptionsDialog(MainWindow parent, PreferenceList preferences, boolean modal) {
-        super(parent, modal);
+    public OptionsDialog(MainWindow parent, PreferenceList preferences) {
+        super(parent, true);
         this.preferences = preferences;
         this.parent = parent;
         initComponents();
