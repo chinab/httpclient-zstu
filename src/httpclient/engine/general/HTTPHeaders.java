@@ -2,8 +2,6 @@ package httpclient.engine.general;
 
 public interface HTTPHeaders {
     // server headers
-    public static final String HEADER_CONTENT_LENGTH = "content-length";
-    public static final String HEADER_CONTENT_TYPE = "content-type";
     public static final String HEADER_MIME_VERSION = "mime-version";
     public static final String HEADER_TRANSFER_ENCODING = "transfer-encoding";
     public static final String HEADER_UPGRADE = "upgrade";
@@ -20,6 +18,9 @@ public interface HTTPHeaders {
     public static final String HEADER_HOST = "Host";
     public static final String HEADER_USER_AGENT = "User-Agent";
     // common headers
-    public static final String HEADER_DATE = "date";
-    public static final String HEADER_CONNECTION = "connection";
+    public static final String HEADER_DATE = "Date";
+    public static final String HEADER_CONNECTION = "Connection";
+    public static final String HEADER_CONTENT_TYPE = "Content-Type";
+    public static final String HEADER_CONTENT_LENGTH = "Content-Length";
+
 }

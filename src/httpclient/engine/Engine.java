@@ -60,10 +60,8 @@ public class Engine implements Runnable, AuthParametersHandler
         }
         try {
             
-
             String resourceName;
             
-
             while(true){
 
                 // create socket
@@ -107,7 +105,7 @@ public class Engine implements Runnable, AuthParametersHandler
         } catch(UnknownHostException e){
             browserWindow.showError("Unknown Host: " + e.getMessage());
         } catch(Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             browserWindow.showError(e.getMessage());
         } finally {
             browserWindow.enableGoButton(true);

@@ -1,16 +1,15 @@
-package httpclient.engine.request;
+package httpclient.engine.request.html;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.HashMap;
 import javax.swing.text.MutableAttributeSet;
 import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.parser.ParserDelegator;
 
-public class HTMLFile extends HTMLEditorKit.ParserCallback{
+public class HTMLFileParser extends HTMLEditorKit.ParserCallback{
 
     private String path;
     private boolean isInForm;
@@ -18,9 +17,10 @@ public class HTMLFile extends HTMLEditorKit.ParserCallback{
     private String action;
     private String arguments;
 
-    private HashMap<String, String> postData = new HashMap<String, String>();
+    private InputList inputList = new InputList();
+    private String textAreaName;
 
-    public HTMLFile(String path){
+    public HTMLFileParser(String path){
         this.path = path;
     }
 
@@ -30,7 +30,8 @@ public class HTMLFile extends HTMLEditorKit.ParserCallback{
         if(isInTextArea){
             //System.out.println(data);
             String text = new String(data);
-            arguments += text;
+            arguments += "&" + textAreaName + "=" + text;
+            inputList.add(new Input(textAreaName, text, "textarea"));
         }
     }
 
@@ -49,9 +50,9 @@ public class HTMLFile extends HTMLEditorKit.ParserCallback{
             if(tagName.equals("textarea")){
                 String name = a.getAttribute(HTML.Attribute.NAME).toString();
                 if(name!=null){
-                    arguments += "&" + name + "=";
+                    
+                    textAreaName = name;
                     isInTextArea = true;
-
                 }
             }
         }
@@ -75,12 +76,14 @@ public class HTMLFile extends HTMLEditorKit.ParserCallback{
         String tagName = t.toString();
         if(isInForm){
             if(tagName.equals("input")){
-                if(a.getAttribute(HTML.Attribute.TYPE).equals("text")){
+                String type = a.getAttribute(HTML.Attribute.TYPE).toString();
+                if(type.equals("text") || type.equals("file")){
                     //remember name
                     String name = a.getAttribute(HTML.Attribute.NAME).toString();
                     //remember value
                     String value = a.getAttribute(HTML.Attribute.VALUE).toString();
                     arguments += "&" + name + "=" + value;
+                    inputList.add(new Input(name, value, type));
                 }
                 if(a.getAttribute(HTML.Attribute.TYPE).equals("file")){
 
@@ -103,6 +106,10 @@ public class HTMLFile extends HTMLEditorKit.ParserCallback{
             throw new IOException("can't find HTML file for POST request."
                     + " please make sure that path to file is correct.");
         }
+    }
+
+    public InputList getInputList(){
+        return inputList;
     }
 
     public String getArguments(){
