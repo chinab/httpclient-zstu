@@ -1,6 +1,6 @@
 package httpclient.engine.general;
 
-public interface HTTPConstants {
+public interface HTTPStatusCodes {
     /** 2XX: generally "OK" */
     public static final int HTTP_OK = 200;
     public static final int HTTP_CREATED = 201;

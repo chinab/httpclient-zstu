@@ -1,7 +1,9 @@
 package httpclient.engine.general;
 
+import httpclient.engine.general.cookie.Cookie;
+import httpclient.engine.general.cookie.CookieParser;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * Contains header names and values of HTTP request.<br>
@@ -50,14 +52,29 @@ public class HeaderList {
      * Gets cookie list.
      * @return List of cookies;
      */
-    public ArrayList<String> getCookies(){
-        ArrayList<String> cookies = new ArrayList<String>();
+    public ArrayList<Cookie> getCookies() throws IOException{
+        ArrayList<Cookie> cookies = new ArrayList<Cookie>();
         for(Header header: headers){
             if(header.getName().equalsIgnoreCase(HTTPHeaders.HEADER_SET_COOKIE)){
-                cookies.add(header.getValue());
+                CookieParser parser = new CookieParser();
+                cookies.add(parser.parse(header.getValue()));
             }
         }
         return cookies;
+    }
+
+    public String getCharset(){
+        if(this.hasHeader(HTTPHeaders.HEADER_CONTENT_TYPE)){
+            Header header = this.getHeader(HTTPHeaders.HEADER_CONTENT_TYPE);
+            String[] attributes = header.getValue().split(";");
+            for(int i=0; i<attributes.length; i++){
+                String nameValue[] = attributes[i].split("=", 2);
+                if(nameValue[0].trim().equalsIgnoreCase("charset")){
+                    return nameValue[1];
+                }
+            }
+        }
+        return "";
     }
 
     @Override
