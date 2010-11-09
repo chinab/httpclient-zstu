@@ -52,12 +52,10 @@ public class Response implements HTTPHeaders{
             throws IOException {
         int b;
         int downloaded = 0;
-        String messageBody = "";
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         while(contentLength!=downloaded) {
             b=in.read();
             if(b==-1){
-                System.out.println(b);
                 break;
             }
             baos.write(b);
@@ -189,13 +187,23 @@ public class Response implements HTTPHeaders{
                 message = readMessage(contentLength, progressDisabled);
             }
 
+            /* cookies */
+            headerList.getCookies(); //TODO: delete
+            
+
+
+            // show text or save to file
             if(headerList.hasHeader(HEADER_CONTENT_TYPE)){
-                
                 if(MIMETypes.isTextType(headerList.getHeader(
                         HEADER_CONTENT_TYPE).getValue())){
+                    String charset = headerList.getCharset();
+                    System.out.println(charset);
+                    if(!charset.isEmpty()){
+                        browserWindow.showMessage(
+                                message.toString(charset.toUpperCase()));
+                    }
                     browserWindow.showMessage(message.toString());
                 } else {
-                    
                     File currentDir = new File(".");
                     JFileChooser fileChooser = new JFileChooser();
                     fileChooser.setCurrentDirectory(currentDir);

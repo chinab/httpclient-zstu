@@ -78,7 +78,6 @@ public class Request implements HTTPHeaders {
                 headerList.addHeader(new Header(HEADER_CONTENT_TYPE,
                         "multipart/x-www-form-urlencoded"));
                 entityBody = getPostUrlEncodedRequestBody(is);
-                //entityBody = file.getArguments();
             }
             headerList.addHeader(new Header(HEADER_CONTENT_LENGTH,
                         String.valueOf(entityBody.length())));

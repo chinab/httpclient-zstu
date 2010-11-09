@@ -2,7 +2,7 @@ package httpclient.engine;
 
 import httpclient.engine.request.Request;
 import httpclient.engine.ui.BrowserWindow;
-import httpclient.engine.general.HTTPConstants;
+import httpclient.engine.general.HTTPStatusCodes;
 import httpclient.engine.ui.InfoWindow;
 import httpclient.engine.response.Response;
 import httpclient.engine.ui.AuthorisationForm;
@@ -88,7 +88,7 @@ public class Engine implements Runnable, AuthParametersHandler
                 response.read();
 
                 int code = response.getStatusCode();
-                if(code!=HTTPConstants.HTTP_UNAUTHORIZED){
+                if(code!=HTTPStatusCodes.HTTP_UNAUTHORIZED){
                     break;
                 } else {
                     authForm.setVisible(Engine.this, response.getRealm());
@@ -105,7 +105,7 @@ public class Engine implements Runnable, AuthParametersHandler
         } catch(UnknownHostException e){
             browserWindow.showError("Unknown Host: " + e.getMessage());
         } catch(Exception e) {
-            //e.printStackTrace();
+            e.printStackTrace();
             browserWindow.showError(e.getMessage());
         } finally {
             browserWindow.enableGoButton(true);
