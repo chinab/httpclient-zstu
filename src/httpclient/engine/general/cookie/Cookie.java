@@ -49,4 +49,26 @@ public class Cookie {
     public boolean isSecure(){
         return secure;
     }
+
+    public boolean hasExpired(){
+        return false;
+    }
+    
+    @Override
+    public String toString(){
+      return domain + "\t" 
+              + path + "\t"
+              + expires + "\t"
+              + name + "\t"
+              + value;
+    }
+
+    public static boolean isEqual(Cookie cookie1, Cookie cookie2){
+        if(cookie1.getDomain().equals(cookie2.getDomain())
+                && cookie1.getPath().equals(cookie2.getPath())
+                && cookie1.getName().equals(cookie2.getName())){
+            return true;
+        }
+        return false;
+    }
 }

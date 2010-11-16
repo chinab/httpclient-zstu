@@ -57,7 +57,7 @@ public class HeaderList {
         for(Header header: headers){
             if(header.getName().equalsIgnoreCase(HTTPHeaders.HEADER_SET_COOKIE)){
                 CookieParser parser = new CookieParser();
-                cookies.add(parser.parse(header.getValue()));
+                cookies.add(parser.parseHeader(header.getValue()));
             }
         }
         return cookies;

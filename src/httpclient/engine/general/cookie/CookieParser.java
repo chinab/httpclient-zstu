@@ -4,7 +4,7 @@ import java.io.IOException;
 
 public class CookieParser {
 
-    public Cookie parse(String headerValue) throws IOException {
+    public Cookie parseHeader(String headerValue) throws IOException {
         String[] attributes = headerValue.split(";");
         String cookieName = "";
         String cookieValue = "";
@@ -49,4 +49,12 @@ public class CookieParser {
             throw new IOException("can't parse cookie!");
         }
     }
+
+    public Cookie parseLine(String line){
+        String params[] = line.split("\\\t");
+        Cookie cookie = new Cookie(params[3], params[4], params[2], "",
+                params[1], params[0], false);
+        return cookie;
+    }
+
 }
