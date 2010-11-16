@@ -17,6 +17,7 @@ public interface HTTPHeaders {
     public static final String HEADER_AUTHORIZATION = "Authorization";
     public static final String HEADER_HOST = "Host";
     public static final String HEADER_USER_AGENT = "User-Agent";
+    public static final String HEADER_COOKIE = "Cookie";
     // common headers
     public static final String HEADER_DATE = "Date";
     public static final String HEADER_CONNECTION = "Connection";

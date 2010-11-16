@@ -5,6 +5,7 @@ import httpclient.engine.ui.BrowserWindow;
 import httpclient.engine.PreferenceList;
 import httpclient.engine.general.*;
 import httpclient.engine.general.MIMETypes;
+import httpclient.engine.general.cookie.CookieProcessor;
 import java.io.*;
 import javax.swing.JFileChooser;
 
@@ -17,8 +18,9 @@ public class Response implements HTTPHeaders{
     private BrowserWindow browserWindow;
     private InfoWindow infoWindow;
     private PreferenceList preferences;
+    private CookieProcessor cp;
 
-    public Response(InputStream is, String resourceName,
+    public Response(InputStream is, String resourceName, CookieProcessor cp,
             PreferenceList preferences, BrowserWindow browserWindow,
             InfoWindow infoWindow){
         this.resourceName = resourceName;
@@ -26,6 +28,7 @@ public class Response implements HTTPHeaders{
         this.infoWindow = infoWindow;
         this.in = is;
         this.preferences = preferences;
+        this.cp = cp;
     }
 
     private String readLine() throws IOException{
@@ -188,8 +191,7 @@ public class Response implements HTTPHeaders{
             }
 
             /* cookies */
-            headerList.getCookies(); //TODO: delete
-            
+            cp.setCookies(headerList.getCookies());
 
 
             // show text or save to file

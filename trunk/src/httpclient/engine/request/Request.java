@@ -5,6 +5,8 @@ import httpclient.engine.PreferenceList;
 import httpclient.engine.general.HTTPHeaders;
 import httpclient.engine.general.Header;
 import httpclient.engine.general.HeaderList;
+import httpclient.engine.general.cookie.Cookie;
+import httpclient.engine.general.cookie.CookieProcessor;
 import httpclient.engine.request.html.Input;
 import httpclient.engine.request.html.InputList;
 
@@ -14,21 +16,26 @@ import java.io.OutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import sun.misc.BASE64Encoder;
 
 public class Request implements HTTPHeaders {
 
+    private final String BOUNDARY_LINE = "1BEF0A57BE110FD467A";
+
     private PreferenceList preferences;
     private URI uri;
     private OutputStream out;
+    private CookieProcessor cp;
     private boolean useAuthentication = false;
     private String password;
     private String login;
 
-    public Request(OutputStream out, URI uri, PreferenceList preferences){
+    public Request(OutputStream out, URI uri, CookieProcessor cp, PreferenceList preferences){
         this.preferences = preferences;
         this.uri = uri;
         this.out = out;
+        this.cp = cp;
     }
 
     private String getRequestLine(){
@@ -54,6 +61,17 @@ public class Request implements HTTPHeaders {
         headerList.addHeader(new Header(HEADER_USER_AGENT, "httpclient 0.1"));
         headerList.addHeader(new Header(HEADER_CONNECTION, "close"));
 
+        // cookies
+        String path = uri.getPath();
+        if(path.isEmpty()){
+            path = "/";
+        }
+        ArrayList<Cookie> cookies = cp.getCookies(uri.getHost(), path);
+        for(Cookie cookie: cookies){
+            headerList.addHeader(new Header(HEADER_COOKIE, 
+                    cookie.getName() +"="+ cookie.getValue()));
+        }
+
         if(requestType.equals(PreferenceList.HTTP_REQUEST_GET)){
             if(useAuthentication){
                 BASE64Encoder encoder = new BASE64Encoder();
@@ -72,7 +90,7 @@ public class Request implements HTTPHeaders {
             // TODO specify request URL in request line
             if(is.hasFiles()){
                 headerList.addHeader(new Header(HEADER_CONTENT_TYPE,
-                        "multipart/form-data"));
+                        "multipart/form-data; boundary=" + BOUNDARY_LINE));
                 entityBody = getPostFormDataRequestBody(is);
             } else {
                 headerList.addHeader(new Header(HEADER_CONTENT_TYPE,
@@ -94,7 +112,7 @@ public class Request implements HTTPHeaders {
             System.out.println(request);
             throw new IOException("post request");
         }
-        
+        System.out.println(request);
         return request;
     }
 
@@ -123,9 +141,9 @@ public class Request implements HTTPHeaders {
 
     private String getPostFormDataRequestBody(InputList is) throws IOException {
         String entityBody = "";
-        String boundary = "1BEF0A57BE110FD467A";
+        
         for(Input input: is){
-            entityBody += "--" + boundary + "\r\n"
+            entityBody += "--" + BOUNDARY_LINE + "\r\n"
                     + "Content-Disposition: form-data; name=\""
                     + input.getName() + "\"";
             if(input.getType().equals("file")){
@@ -140,7 +158,7 @@ public class Request implements HTTPHeaders {
                 entityBody += input.getValue() + "\r\n";
             }
         }
-        entityBody += "--" + boundary + "--\r\n";
+        entityBody += "--" + BOUNDARY_LINE + "--\r\n";
         return entityBody;
     }
 
