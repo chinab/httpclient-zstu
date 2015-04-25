@@ -1,0 +1,1 @@
+Client allows to send requests (HEAD, GET, POST) and view server responce.
